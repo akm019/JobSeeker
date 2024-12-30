@@ -12,6 +12,24 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const isChatAllowed = () => {
+    if (participant._id === currentUser._id) {
+      setError("You cannot chat with yourself");
+      return false;
+    }
+    return true;
+  };
+
+  useEffect(() => {
+    if (!isChatAllowed()) {
+      onClose(); // Close the chat window if it's a self-chat attempt
+      return;
+    }
+
+    if (participant?._id) {
+      fetchPersonalMessages();
+    }
+  }, [participant?._id]);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,26 +42,31 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
   }, [participant?._id]);
 
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Socket connected:', socket.id);
-      socket.emit('join_personal_room', currentUser._id);
-    });
+    if (!participant?._id || !currentUser?._id) return;
   
-    socket.on('receive_personal_message', (message) => {
-      console.log('Received message:', message);
-      setMessages(prev => [...prev, message]);
+    const roomId = [currentUser._id, participant._id].sort().join('-');
+    console.log('Joining room:', roomId); // Debug log
+  
+    socket.emit('join_personal_chat', roomId);
+  
+    const handleNewMessage = (message) => {
+      console.log('Received message:', message); // Debug log
+      setMessages(prev => {
+        // Check if message already exists
+        const exists = prev.some(m => m._id === message._id);
+        if (exists) return prev;
+        return [...prev, message];
+      });
       scrollToBottom();
-    });
-
-    socket.on('message_deleted', ({ messageId }) => {
-      setMessages(prev => prev.filter(msg => msg._id !== messageId));
-    });
-
-    return () => {
-      socket.off('receive_personal_message');
-      socket.off('message_deleted');
     };
-  }, [currentUser._id]);
+  
+    socket.on('receive_personal_message', handleNewMessage);
+  
+    return () => {
+      socket.off('receive_personal_message', handleNewMessage);
+      socket.emit('leave_personal_chat', roomId);
+    };
+  }, [participant?._id, currentUser?._id]);
 
   const fetchPersonalMessages = async () => {
     try {
@@ -135,8 +158,8 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
     e.preventDefault();
     if ((!newMessage.trim() && !selectedFile) || isUploading) return;
   
-    setIsUploading(true);
     try {
+      setIsUploading(true);
       let fileUrl = null;
       if (selectedFile) {
         fileUrl = await uploadFile(selectedFile);
@@ -157,20 +180,26 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
         body: JSON.stringify(messageData)
       });
   
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to send message');
-      }
-  
+      if (!res.ok) throw new Error('Failed to send message');
+      
       const savedMessage = await res.json();
-      socket.emit('send_personal_message', savedMessage);
+      console.log('Saved message:', savedMessage); // Debug log
+  
+      // Create consistent room ID
+      const roomId = [currentUser._id, participant._id].sort().join('-');
+      
+      // Emit with room ID
+      socket.emit('send_personal_message', {
+        message: savedMessage,
+        room: roomId
+      });
+  
       setMessages(prev => [...prev, savedMessage]);
       setNewMessage('');
       setSelectedFile(null);
       scrollToBottom();
     } catch (error) {
-      console.error('Error sending message:', error);
-      alert('Failed to send message. Please try again.');
+      console.error('Error:', error);
     } finally {
       setIsUploading(false);
     }

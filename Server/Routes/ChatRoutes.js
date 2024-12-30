@@ -268,6 +268,66 @@ router.get('/messages/:roomId', authenticateToken, async (req, res) => {
   }
 });
 
+
+router.delete('/personal-messages/:messageId', authenticateToken, async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const userId = req.user.id;
+
+    // Find the message and verify ownership
+    const message = await PersonalMessage.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: 'Message not found' });
+    }
+
+    // Check if the user is the sender of the message
+    if (message.from.toString() !== userId) {
+      return res.status(403).json({ message: 'Unauthorized to delete this message' });
+    }
+
+    await PersonalMessage.findByIdAndDelete(messageId);
+    res.status(200).json({ message: 'Message deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    res.status(500).json({ message: 'Failed to delete message' });
+  }
+});
+
+
+router.delete('/rooms/:roomId/participants/:userId', authenticateToken, async (req, res) => {
+  try {
+    const { roomId, userId } = req.params;
+    
+    // Check if the requester is the professional of the room
+    const room = await ChatRoom.findById(roomId);
+    if (!room) {
+      return res.status(404).json({ message: 'Room not found' });
+    }
+
+    if (room.professional.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Only the professional can remove participants' });
+    }
+
+    // Delete the enrollment
+    await RoomEnrollment.findOneAndDelete({
+      room: roomId,
+      user: userId
+    });
+
+    // Emit socket event to notify the removed user
+    req.app.get('io').to(roomId).emit('participant_removed', {
+      roomId,
+      userId,
+      removedBy: req.user.id
+    });
+
+    res.json({ message: 'Participant removed successfully' });
+  } catch (error) {
+    console.error('Error removing participant:', error);
+    res.status(500).json({ message: 'Error removing participant' });
+  }
+});
+
 router.get('/rooms/:roomId/participants', authenticateToken, async (req, res) => {
   try {
     const enrollments = await RoomEnrollment.find({ room: req.params.roomId })

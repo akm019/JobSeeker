@@ -53,47 +53,33 @@ connectDB();
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
-  // Handle joining a personal room
-  socket.on('join_personal_room', (userId) => {
-    socket.join(userId);
-    console.log(`User ${socket.id} joined personal room ${userId}`);
+  // Join personal chat room
+  socket.on('join_personal_chat', (roomId) => {
+    socket.join(roomId);
+    console.log(`User joined personal chat: ${roomId}`);
   });
 
-  // Handle joining a chat room
+  // Send personal message
+  socket.on('send_personal_message', ({ message, room }) => {
+    console.log('Broadcasting to room:', room, 'Message:', message);
+    socket.to(room).emit('receive_personal_message', message);
+  });
+
+  // Delete personal message
+  socket.on('delete_personal_message', ({ messageId, room }) => {
+    socket.to(room).emit('message_deleted', { messageId });
+  });
+
+  // Handle room chat
   socket.on('join_room', (roomId) => {
     socket.join(roomId);
-    console.log(`User ${socket.id} joined room ${roomId}`);
+    console.log(`User joined room ${roomId}`);
   });
 
-  // Handle leaving a room
-  socket.on('leave_room', (roomId) => {
-    socket.leave(roomId);
-    console.log(`User ${socket.id} left room ${roomId}`);
-  });
-
-  // Handle sending a personal message
-  socket.on('send_personal_message', (message) => {
-    console.log('Sending personal message to:', message.to);
-    io.to(message.to).emit('receive_personal_message', message);
-  });
-  
-  // Handle deleting a personal message
-  socket.on('delete_personal_message', ({ messageId, to }) => {
-    console.log('Deleting message:', messageId);
-    io.to(to).emit('personal_message_deleted', messageId);
-  });
-
-  // Handle sending a room message
   socket.on('send_message', async ({ roomId, message }) => {
-    try {
-      io.to(roomId).emit('receive_message', message);
-    } catch (error) {
-      console.error('Error broadcasting message:', error);
-      socket.emit('message_error', { error: 'Failed to broadcast message' });
-    }
+    io.to(roomId).emit('receive_message', message);
   });
 
-  // Handle disconnection
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });

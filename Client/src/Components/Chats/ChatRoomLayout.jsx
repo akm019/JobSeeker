@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { AuthContext } from '../../AuthContext';
+import { Trash2 } from 'lucide-react';
 import ChatRoom from './ChatRoom';
 import io from 'socket.io-client';
 import PersonalChat from './PersonalChat';
@@ -19,23 +20,28 @@ function ChatRoomLayout() {
 
   const startPersonalChat = (participant) => {
     console.log('Starting chat with participant:', participant); // Debug log
+    
+    // Don't allow chat with undefined participant
     if (!participant || !participant._id) {
       console.error('Invalid participant data:', participant);
       return;
     }
-    
-    if (!activePersonalChats.find(chat => chat._id === participant._id)) {
+  
+    // Check if a chat already exists with this participant
+    const existingChat = activePersonalChats.find(chat => chat._id === participant._id);
+    if (!existingChat) {
+      // Add proper role and id handling
       setActivePersonalChats(prev => [...prev, {
         _id: participant._id,
         name: participant.name,
-        role: participant.role
+        role: participant.role || participant.user?.role // Handle both direct and populated data
       }]);
     }
   };
 
-const closePersonalChat = (participantId) => {
-  setActivePersonalChats(prev => prev.filter(chat => chat._id !== participantId));
-}; // Track online users
+  const closePersonalChat = (participantId) => {
+    setActivePersonalChats(prev => prev.filter(chat => chat._id !== participantId));
+  };
 
   useEffect(() => {
     const initializeRoom = async () => {
@@ -88,25 +94,70 @@ const closePersonalChat = (participantId) => {
     }
   };
 
- const fetchParticipants = async () => {
-  try {
-    const res = await fetch(`http://localhost:5000/api/rooms/${roomId}/participants`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+  const removeParticipant = async (participantId) => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/rooms/${roomId}/participants/${participantId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+
+      if (res.ok) {
+        // Update participants list locally
+        setParticipants(prev => prev.filter(p => p._id !== participantId));
+        // Close any active personal chat with this participant
+        closePersonalChat(participantId);
+      } else {
+        const error = await res.json();
+        alert(error.message || 'Failed to remove participant');
+      }
+    } catch (error) {
+      console.error('Error removing participant:', error);
+      alert('Failed to remove participant');
+    }
+  };
+
+  useEffect(() => {
+    socket.on('participant_removed', ({ roomId: removedFromRoom, userId }) => {
+      if (roomId === removedFromRoom) {
+        if (userId === user._id) {
+          // Current user was removed
+          setIsEnrolled(false);
+          alert('You have been removed from this chat room');
+        } else {
+          // Another participant was removed
+          setParticipants(prev => prev.filter(p => p._id !== userId));
+        }
       }
     });
-    const data = await res.json();
-    console.log('Fetched participants:', data); // Debug log
-    setParticipants(data.map(participant => ({
-      _id: participant._id || user._id, // Handle both structures
-      name: participant.name || participant.user.name,
-      role: participant.role || participant.user.role,
-      // Add other necessary fields
-    })));
-  } catch (error) {
-    console.error('Error fetching participants:', error);
-  }
-};
+
+    return () => {
+      socket.off('participant_removed');
+    };
+  }, [roomId, user._id]);
+
+  const fetchParticipants = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/rooms/${roomId}/participants`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await res.json();
+      console.log('Fetched participants:', data); // Debug log
+      setParticipants(data.map(participant => ({
+        _id: participant._id || participant.user._id,
+        name: participant.name || participant.user.name,
+        role: participant.role || participant.user.role,
+      })));
+    } catch (error) {
+      console.error('Error fetching participants:', error);
+    }
+  };
 
   const checkEnrollmentStatus = async () => {
     try {
@@ -139,6 +190,45 @@ const closePersonalChat = (participantId) => {
     }
   };
 
+  const renderParticipant = (participant) => {
+    const isCurrentUserProfessional = user?._id === roomDetails?.professional?._id;
+    
+    return (
+      <div
+        key={participant._id}
+        className="p-3 rounded-lg bg-gray-50 flex items-center justify-between hover:bg-gray-100"
+      >
+        <div 
+          className="flex items-center cursor-pointer flex-1"
+          onClick={() => startPersonalChat(participant)}
+        >
+          <div className={`w-2.5 h-2.5 rounded-full mr-2 ${
+            onlineUsers.has(participant._id) ? 'bg-green-500' : 'bg-gray-300'
+          }`} />
+          <div>
+            <p className="font-medium">{participant.name}</p>
+            <p className="text-xs text-gray-500">{participant.role}</p>
+          </div>
+        </div>
+        
+        {isCurrentUserProfessional  && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (window.confirm(`Remove ${participant.name} from the chat room?`)) {
+                removeParticipant(participant._id);
+              }
+            }}
+            className="ml-2 p-1.5 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+            title="Remove participant"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+    );
+  };
+
   if (!roomDetails) return <div>Loading...</div>;
 
   return (
@@ -154,14 +244,13 @@ const closePersonalChat = (participantId) => {
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2">Professional</h3>
             {roomDetails.professional && (
-              <div className="p-3 rounded-lg bg-blue-50 flex items-center">
-                <div
-                  className={`w-2.5 h-2.5 rounded-full mr-2 ${
-                    onlineUsers.has(roomDetails.professional._id)
-                      ? 'bg-green-500'
-                      : 'bg-gray-300'
-                  }`}
-                />
+              <div 
+                className="p-3 rounded-lg bg-blue-50 flex items-center cursor-pointer hover:bg-blue-100"
+                onClick={() => startPersonalChat(roomDetails.professional)}
+              >
+                <div className={`w-2.5 h-2.5 rounded-full mr-2 ${
+                  onlineUsers.has(roomDetails.professional._id) ? 'bg-green-500' : 'bg-gray-300'
+                }`} />
                 <div>
                   <p className="font-medium">{roomDetails.professional.name}</p>
                   <p className="text-xs text-gray-500">Professional</p>
@@ -182,37 +271,7 @@ const closePersonalChat = (participantId) => {
           <div>
             <h3 className="text-lg font-semibold mb-3">Participants</h3>
             <div className="space-y-2">
-            {participants.map((participant) => (
-  <div
-    key={participant._id}
-    className="p-3 rounded-lg bg-gray-50 flex items-center cursor-pointer hover:bg-gray-100"
-    onClick={() => startPersonalChat(participant)}
-  >
-    <div className={`w-2.5 h-2.5 rounded-full mr-2 ${
-      onlineUsers.has(participant._id) ? 'bg-green-500' : 'bg-gray-300'
-    }`} />
-    <div>
-      <p className="font-medium">{participant.name}</p>
-      <p className="text-xs text-gray-500">{participant.role}</p>
-    </div>
-  </div>
-))}
-
-{/* Add personal chat windows */}
-{activePersonalChats.map(participant => {
-  if (!participant?._id) {
-    console.error('Invalid participant in activePersonalChats:', participant);
-    return null;
-  }
-  return (
-    <PersonalChat
-      key={participant._id}
-      participant={participant}
-      currentUser={user}
-      onClose={() => closePersonalChat(participant._id)}
-    />
-  );
-})}
+              {participants.map(renderParticipant)}
             </div>
           </div>
         </div>
@@ -238,6 +297,22 @@ const closePersonalChat = (participantId) => {
           </div>
         )}
       </div>
+
+      {/* Personal Chat Windows */}
+      {activePersonalChats.map(participant => {
+        if (!participant?._id) {
+          console.error('Invalid participant in activePersonalChats:', participant);
+          return null;
+        }
+        return (
+          <PersonalChat
+            key={participant._id}
+            participant={participant}
+            currentUser={user}
+            onClose={() => closePersonalChat(participant._id)}
+          />
+        );
+      })}
     </div>
   );
 }

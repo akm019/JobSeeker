@@ -16,30 +16,41 @@ function ChatRoom({ roomId }) {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
+ 
   useEffect(() => {
     if (!user) {
       navigate('/Signup');
       return;
     }
 
+    // Connect to socket and fetch initial messages
+    socket.connect();
     socket.emit('join_room', roomId);
     fetchMessages();
 
-    socket.on('receive_message', (message) => {
-      if (message.sender.id !== user.id) {
-        setMessages(prev => [...prev, message]);
-        scrollToBottom();
-      }
-    });
+    // Socket event listeners
+    const handleReceiveMessage = (message) => {
+      setMessages(prev => {
+        // Check if message already exists to prevent duplicates
+        const messageExists = prev.some(msg => msg._id === message._id);
+        if (messageExists) return prev;
+        return [...prev, message];
+      });
+      scrollToBottom();
+    };
 
-    socket.on('message_deleted', (messageId) => {
+    const handleDeleteMessage = (messageId) => {
       setMessages(prev => prev.filter(msg => msg._id !== messageId));
-    });
+    };
+
+    socket.on('receive_message', handleReceiveMessage);
+    socket.on('message_deleted', handleDeleteMessage);
 
     return () => {
-      socket.off('receive_message');
-      socket.off('message_deleted');
+      socket.off('receive_message', handleReceiveMessage);
+      socket.off('message_deleted', handleDeleteMessage);
       socket.emit('leave_room', roomId);
+      socket.disconnect();
     };
   }, [roomId, user, navigate]);
 
@@ -59,7 +70,7 @@ function ChatRoom({ roomId }) {
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
-  };
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -110,14 +121,17 @@ function ChatRoom({ roomId }) {
 
       if (!res.ok) throw new Error('Failed to delete message');
 
-      socket.emit('delete_message', { roomId, messageId });
+      // First update local state
       setMessages(prev => prev.filter(msg => msg._id !== messageId));
+      // Then emit the socket event
+      socket.emit('delete_message', { roomId, messageId });
     } catch (error) {
       console.error('Error deleting message:', error);
       alert('Failed to delete message');
     }
   };
 
+ 
   const sendMessage = async (e) => {
     e.preventDefault();
     if ((!newMessage.trim() && !selectedFile) || isUploading) return;
@@ -147,10 +161,20 @@ function ChatRoom({ roomId }) {
       if (!res.ok) throw new Error('Failed to send message');
 
       const savedMessage = await res.json();
+      
+      // First update local state
+      setMessages(prev => {
+        // Check if message already exists
+        const messageExists = prev.some(msg => msg._id === savedMessage._id);
+        if (messageExists) return prev;
+        return [...prev, savedMessage];
+      });
+      
+      // Then emit the socket event
       socket.emit('send_message', { roomId, message: savedMessage });
+      
       setNewMessage('');
       setSelectedFile(null);
-      setMessages(prev => [...prev, savedMessage]);
       scrollToBottom();
     } catch (error) {
       console.error('Error sending message:', error);
