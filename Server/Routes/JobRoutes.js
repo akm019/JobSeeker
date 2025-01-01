@@ -66,6 +66,7 @@ router.get("/JobPost", async (req, res) => {
 
   router.post('/apply/:jobId', authenticateToken, async (req, res) => {
     const { jobId } = req.params;
+    console.log(jobId)
     const userId = req.user.id;
   
     try {
@@ -108,13 +109,37 @@ router.get("/JobPost", async (req, res) => {
   router.get('/my-applications', authenticateToken, async (req, res) => {
     try {
       const applications = await Application.find({ userId: req.user.id })
-        .populate('jobId') // This will populate the job details
-        .sort({ appliedAt: -1 }); // Sort by most recent first
+        .populate({
+          path: 'jobId',
+          select: 'jobId positionTitle companyName location salary',
+          model: 'Job'
+        })
+        .sort({ appliedAt: -1 });
   
-      res.status(200).json(applications);
+      // Filter out applications with invalid job references
+      const validApplications = applications
+        .filter(app => app.jobId != null)
+        .map(app => ({
+          _id: app._id,
+          jobId: {
+            _id: app.jobId._id,
+            positionTitle: app.jobId.positionTitle || 'Unknown Position',
+            companyName: app.jobId.companyName || 'Unknown Company',
+            location: app.jobId.location || 'Location not specified',
+            salary: app.jobId.salary || 'Salary not specified'
+          },
+          status: app.status || 'pending',
+          appliedAt: app.appliedAt,
+          coverLetter: app.coverLetter || ''
+        }));
+  
+      res.status(200).json(validApplications);
     } catch (error) {
       console.error('Error fetching applications:', error);
-      res.status(500).json({ message: 'Failed to fetch applications.' });
+      res.status(500).json({ 
+        message: 'Failed to fetch applications',
+        error: error.message 
+      });
     }
   });
 
@@ -144,10 +169,17 @@ router.get("/JobPost", async (req, res) => {
   //     res.status(500).json({ message: 'Failed to fetch applications' });
   //   }
   // });
+ 
   router.get('/applications/:jobId', authenticateToken, async (req, res) => {
     try {
       const { jobId } = req.params;
+      console.log(jobId);
       
+      // Add validation for jobId
+      if (!jobId || jobId === 'undefined') {
+        return res.status(400).json({ message: 'Invalid job ID provided' });
+      }
+  
       // Verify the job exists and belongs to the requesting user
       const job = await Job.findOne({ 
         _id: jobId,
@@ -163,7 +195,7 @@ router.get("/JobPost", async (req, res) => {
         .populate({
           path: 'userId',
           select: 'name email skills',
-          model: 'User'  // Make sure this matches your User model name
+          model: 'User'
         })
         .sort({ appliedAt: -1 });
       
@@ -171,18 +203,22 @@ router.get("/JobPost", async (req, res) => {
       const formattedApplications = applications.map(app => ({
         _id: app._id,
         user: {
-          name: app.userId.name,
-          email: app.userId.email,
-          skills: app.userId.skills
+          name: app.userId?.name || 'Anonymous',
+          email: app.userId?.email || 'Not provided',
+          skills: app.userId?.skills || 'Not specified'
         },
-        coverLetter: app.coverLetter,
+        status: app.status || 'pending',
+        coverLetter: app.coverLetter || '',
         appliedAt: app.appliedAt
       }));
       
       res.status(200).json(formattedApplications);
     } catch (error) {
       console.error('Error fetching applications:', error);
-      res.status(500).json({ message: 'Failed to fetch applications' });
+      res.status(500).json({ 
+        message: 'Failed to fetch applications',
+        error: error.message 
+      });
     }
   });
 
@@ -219,7 +255,40 @@ router.delete('/JobPost/:jobId', authenticateToken, async (req, res) => {
 });
 
 
+router.patch('/applications/:applicationId/status', authenticateToken, async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+    const { status } = req.body;
+    
+    if (!['pending', 'selected', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
 
+    const application = await Application.findById(applicationId);
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+
+    // Verify the job belongs to the user making the request
+    const job = await Job.findOne({
+      _id: application.jobId,
+      postedBy: req.user.id
+    });
+
+    if (!job) {
+      return res.status(403).json({ message: 'Not authorized to update this application' });
+    }
+
+    application.status = status;
+    await application.save();
+
+    res.json({ message: 'Application status updated successfully', application });
+  } catch (error) {
+    console.error('Error updating application status:', error);
+    res.status(500).json({ message: 'Failed to update application status' });
+}
+
+})
   router.get('/MyJobs', authenticateToken, async (req, res) => {
     try {
       const userId = req.user.id; // Authenticated user's ID from token

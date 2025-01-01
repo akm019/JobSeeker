@@ -11,6 +11,11 @@ const applicationSchema = new mongoose.Schema({
     ref: 'Job', // Reference to the Job model
     required: true,
   },
+  status: {
+    type: String,
+    enum: ['pending', 'selected', 'rejected'],
+    default: 'pending'
+  },
   appliedAt: {
     type: Date,
     default: Date.now,

@@ -79,17 +79,24 @@ const JobFind = () => {
                 <strong>Description:</strong> {job.description}
               </p>
             </div>
-            <button
-              className={`mt-4 py-2 px-4 rounded-md shadow ${
-                appliedJobs.includes(job._id)
-                  ? 'bg-gray-500 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              } text-white`}
-              onClick={() => handleApply(job._id)}
-              disabled={appliedJobs.includes(job._id)}
-            >
-              {appliedJobs.includes(job._id) ? 'Applied' : 'Apply Now'}
-            </button>
+            {appliedJobs.includes(job._id) ? (
+              <div className={`text-center py-2 px-4 rounded-md ${
+                job.applicationStatus === 'selected' ? 'bg-green-100 text-green-800' :
+                job.applicationStatus === 'rejected' ? 'bg-red-100 text-red-800' :
+                'bg-yellow-100 text-yellow-800'
+              }`}>
+                Status: {job.applicationStatus ? 
+                  job.applicationStatus.charAt(0).toUpperCase() + job.applicationStatus.slice(1) 
+                  : 'Pending'}
+              </div>
+            ) : (
+              <button
+                className="w-full py-2 px-4 rounded-md shadow bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => handleApply(job._id)}
+              >
+                Apply Now
+              </button>
+            )}
           </div>
         ))}
       </div>

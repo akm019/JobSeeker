@@ -48,6 +48,7 @@ const JobPost = () => {
   };
   const handleDeleteJob = async (jobId) => {
     const token = localStorage.getItem("token");
+    console.log(jobId)
     if (!token) {
       alert("Unauthorized: Please log in.");
       return;
@@ -71,9 +72,12 @@ const JobPost = () => {
   
   // Fetch applicants for a specific job
   const fetchApplicants = async (jobId) => {
+    console.log(jobId)
     const token = localStorage.getItem("token");
     try {
+      console.log(user)
       const response = await axios.get(`http://localhost:5000/api/applications/${jobId}`, {
+        
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -132,53 +136,113 @@ const JobPost = () => {
     }
   }, [user, navigate]);
 
-  const ApplicantsList = ({ applicants }) => (
-    <div className="bg-gray-950 p-6 rounded-lg border border-purple-500">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold text-white">Applicants</h3>
-        <button
-          onClick={() => setViewingApplicants(false)}
-          className="text-white hover:text-gray-300"
-        >
-          ← Back to Jobs
-        </button>
-      </div>
-      {!applicants || applicants.length === 0 ? (
-        <p className="text-gray-400">No applicants yet.</p>
-      ) : (
-        <div className="space-y-4">
-          {applicants.map((applicant) => (
-            <div
-              key={applicant._id}
-              className="bg-gray-900 p-4 rounded-lg border border-gray-700"
-            >
-              <h4 className="text-lg font-semibold text-white">
-                {applicant.user?.name || "Anonymous Applicant"}
-              </h4>
-              <p className="text-gray-300">
-                Email: {applicant.user?.email || "Not provided"}
-              </p>
-              <p className="text-gray-300">
-                Skills: {applicant.user?.skills || "Not specified"}
-              </p>
-              <p className="text-gray-300">
-                Applied on:{" "}
-                {applicant.appliedAt
-                  ? new Date(applicant.appliedAt).toLocaleDateString()
-                  : "Date not available"}
-              </p>
-              {applicant.coverLetter && (
-                <div className="mt-2">
-                  <p className="text-gray-400">Cover Letter:</p>
-                  <p className="text-gray-300">{applicant.coverLetter}</p>
-                </div>
-              )}
-            </div>
-          ))}
+  const ApplicantsList = ({ applicants,fetchApplicants }) => {
+    const handleStatusChange = async (applicationId, newStatus,jobId) => {
+      const token = localStorage.getItem("token");
+      try {
+        await axios.patch(
+          `http://localhost:5000/api/applications/${applicationId}/status`,
+          { status: newStatus },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setApplicants(prevApplicants => 
+          prevApplicants.map(applicant => 
+            applicant._id === applicationId 
+              ? { ...applicant, status: newStatus }
+              : applicant
+          )
+        );
+        // Refresh the applicants list after status update
+        if (jobId) {
+          fetchApplicants(jobId);
+        }
+      } catch (error) {
+        console.error("Error updating application status:", error);
+        alert("Failed to update application status");
+      }
+    };
+  
+    return (
+      <div className="bg-gray-950 p-6 rounded-lg border border-purple-500">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold text-white">Applicants</h3>
+          <button
+            onClick={() => setViewingApplicants(false)}
+            className="text-white hover:text-gray-300"
+          >
+            ← Back to Jobs
+          </button>
         </div>
-      )}
-    </div>
-  );
+        {!applicants || applicants.length === 0 ? (
+          <p className="text-gray-400">No applicants yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {applicants.map((applicant) => (
+              <div
+                key={applicant._id}
+                className="bg-gray-900 p-4 rounded-lg border border-gray-700"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="text-lg font-semibold text-white">
+                      {applicant.user?.name || "Anonymous Applicant"}
+                    </h4>
+                    <p className="text-gray-300">
+                      Email: {applicant.user?.email || "Not provided"}
+                    </p>
+                    <p className="text-gray-300">
+                      Skills: {applicant.user?.skills || "Not specified"}
+                    </p>
+                    <p className="text-gray-300">
+                      Status: <span className={`font-semibold ${
+                        applicant.status === 'selected' ? 'text-green-400' :
+                        applicant.status === 'rejected' ? 'text-red-400' :
+                        'text-yellow-400'
+                      }`}>{applicant.status}</span>
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleStatusChange(applicant._id, 'selected', applicant.jobId)}
+                      className={`px-3 py-1 ${
+                        applicant.status === 'selected'
+                          ? 'bg-green-800'
+                          : 'bg-green-600 hover:bg-green-700'
+                      } text-white rounded`}
+                      disabled={applicant.status === 'selected'}
+                    >
+                      {applicant.status === 'selected' ? 'Selected' : 'Select'}
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange(applicant._id, 'rejected', applicant.jobId)}
+                      className={`px-3 py-1 ${
+                        applicant.status === 'rejected'
+                          ? 'bg-red-800'
+                          : 'bg-red-600 hover:bg-red-700'
+                      } text-white rounded`}
+                      disabled={applicant.status === 'rejected'}
+                    >
+                      {applicant.status === 'rejected' ? 'Rejected' : 'Reject'}
+                    </button>
+                  </div>
+                </div>
+                {applicant.coverLetter && (
+                  <div className="mt-2">
+                    <p className="text-gray-400">Cover Letter:</p>
+                    <p className="text-gray-300">{applicant.coverLetter}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   if (!user || user.role !== "jobPoster") {
     return null;
@@ -307,44 +371,60 @@ const JobPost = () => {
                 {loading ? (
                   <p className="text-gray-300">Loading jobs...</p>
                 ) : error ? (
-                  <p className="text-red-500">{error}</p>
+                  <div className="p-3 bg-red-900 text-white rounded">
+                    {error}
+                  </div>
                 ) : jobs.length === 0 ? (
                   <p className="text-gray-300">No jobs posted yet.</p>
                 ) : (
                   <div className="space-y-4">
-                   {jobs.map((job) => (
-  <div
-    key={job._id}
-    className="bg-gray-900 p-4 border border-gray-700 rounded-md shadow-sm"
-  >
-    <h3 className="text-lg font-bold text-white">
-      {job.positionTitle}
-    </h3>
-    <p className="text-sm text-gray-300">
-      <strong>Industry:</strong> {job.industry || "N/A"}
-    </p>
-    <p className="text-sm text-gray-300">
-      <strong>Salary:</strong> ${job.salary || "N/A"}
-    </p>
-    <p className="text-sm text-gray-300">
-      <strong>Location:</strong> {job.location || "N/A"}
-    </p>
-    <p className="text-sm text-gray-300">
-      <strong>Company:</strong> {job.companyName || "N/A"}
-    </p>
-    <button
-      onClick={() => fetchApplicants(job._id)}
-      className="mt-2 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md text-sm"
-    >
-      View Applicants
-    </button>
-    <button
-      onClick={() => handleDeleteJob(job._id)}
-      className="mt-2 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md text-sm"
-    >
-      Delete Job
-    </button>
-  </div>
+                    {jobs.map((job) => (
+                      <div
+                        key={job._id}
+                        className="bg-gray-900 p-4 border border-gray-700 rounded-md shadow-sm"
+                      >
+                        <h3 className="text-lg font-bold text-white">
+                          {job.positionTitle}
+                        </h3>
+                        <p className="text-sm text-gray-300">
+                          <strong>Industry:</strong> {job.industry || "N/A"}
+                        </p>
+                        <p className="text-sm text-gray-300">
+                          <strong>Salary:</strong> ${job.salary || "N/A"}
+                        </p>
+                        <p className="text-sm text-gray-300">
+                          <strong>Location:</strong> {job.location || "N/A"}
+                        </p>
+                        <p className="text-sm text-gray-300">
+                          <strong>Company:</strong> {job.companyName || "N/A"}
+                        </p>
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => {
+                              if (job._id) {
+                                fetchApplicants(job._id);
+                              } else {
+                                setError("Invalid job ID");
+                              }
+                            }}
+                            className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md text-sm"
+                          >
+                            View Applicants
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (job._id) {
+                                handleDeleteJob(job._id);
+                              } else {
+                                setError("Invalid job ID");
+                              }
+                            }}
+                            className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md text-sm"
+                          >
+                            Delete Job
+                          </button>
+                        </div>
+                      </div>
 ))}
 
                   </div>
