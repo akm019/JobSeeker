@@ -152,3 +152,7 @@ const AIQuiz = () => {
         setActive(null);
       });
   };
+
+
+
+"nodemon --max-old-space-size=4096 index.js"
