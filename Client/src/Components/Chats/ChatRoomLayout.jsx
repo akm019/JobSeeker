@@ -37,7 +37,7 @@ function ChatRoomLayout() {
     }
   };
 
-  const socket = io("https://jobseeker1-6lnb.onrender.com", {
+  const socket = io("https://jobseeker-1-mg4e.onrender.com", {
     transports: ['websocket', 'polling'],
     forceNew: true,
     reconnectionAttempts: 5,
@@ -87,7 +87,7 @@ function ChatRoomLayout() {
 
   const fetchRoomDetails = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/rooms/${roomId}`, {
+      const res = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/rooms/${roomId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -102,7 +102,7 @@ function ChatRoomLayout() {
   const removeParticipant = async (participantId) => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/rooms/${roomId}/participants/${participantId}`,
+        `https://jobseeker-1-mg4e.onrender.com/api/rooms/${roomId}/participants/${participantId}`,
         {
           method: 'DELETE',
           headers: {
@@ -147,7 +147,7 @@ function ChatRoomLayout() {
 
   const fetchParticipants = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/rooms/${roomId}/participants`, {
+      const res = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/rooms/${roomId}/participants`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -166,7 +166,7 @@ function ChatRoomLayout() {
 
   const checkEnrollmentStatus = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/rooms/${roomId}/enrollment-status`, {
+      const res = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/rooms/${roomId}/enrollment-status`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -180,7 +180,7 @@ function ChatRoomLayout() {
 
   const handleEnroll = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/rooms/${roomId}/enroll`, {
+      const res = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/rooms/${roomId}/enroll`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

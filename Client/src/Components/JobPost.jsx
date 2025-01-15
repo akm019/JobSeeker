@@ -33,7 +33,7 @@ const JobPost = () => {
     }
 
     try {
-      const response = await axios.get("http://localhost:5000/api/MyJobs", {
+      const response = await axios.get("https://jobseeker-1-mg4e.onrender.com/api/MyJobs", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -55,7 +55,7 @@ const JobPost = () => {
     }
   
     try {
-      await axios.delete(`http://localhost:5000/api/JobPost/${jobId}`, {
+      await axios.delete(`https://jobseeker-1-mg4e.onrender.com/api/JobPost/${jobId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -76,7 +76,7 @@ const JobPost = () => {
     const token = localStorage.getItem("token");
     try {
       console.log(user)
-      const response = await axios.get(`http://localhost:5000/api/applications/${jobId}`, {
+      const response = await axios.get(`https://jobseeker-1-mg4e.onrender.com/api/applications/${jobId}`, {
         
         headers: {
           Authorization: `Bearer ${token}`,
@@ -106,7 +106,7 @@ const JobPost = () => {
     }
 
     try {
-      await axios.post("https://jobseeker1-6lnb.onrender.com/api/JobPost", formData, {
+      await axios.post("https://jobseeker-1-mg4e.onrender.com/api/JobPost", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -141,7 +141,7 @@ const JobPost = () => {
       const token = localStorage.getItem("token");
       try {
         await axios.patch(
-          `https://jobseeker1-6lnb.onrender.com/api/applications/${applicationId}/status`,
+          `https://jobseeker-1-mg4e.onrender.com/api/applications/${applicationId}/status`,
           { status: newStatus },
           {
             headers: {

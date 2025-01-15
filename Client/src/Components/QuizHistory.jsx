@@ -16,7 +16,7 @@ const QuizHistory = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`http://localhost:5000/api/quiz/history?page=${page}`, {
+      const response = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/quiz/history?page=${page}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}` // Assuming you store token in localStorage
         }
@@ -42,7 +42,7 @@ const QuizHistory = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/quiz/history/${quizId}`, {
+      const response = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/quiz/history/${quizId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

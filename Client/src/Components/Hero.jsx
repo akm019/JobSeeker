@@ -53,7 +53,7 @@ const Hero = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await axios.get('https://jobseeker1-6lnb.onrender.com/api/JobPost');
+        const response = await axios.get('https://jobseeker-1-mg4e.onrender.com/api/JobPost');
         setJobs(response.data);
       } catch (error) {
         console.error('Error fetching jobs:', error);
