@@ -106,7 +106,7 @@ const JobPost = () => {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/JobPost", formData, {
+      await axios.post("https://jobseeker1-6lnb.onrender.com/api/JobPost", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -141,7 +141,7 @@ const JobPost = () => {
       const token = localStorage.getItem("token");
       try {
         await axios.patch(
-          `http://localhost:5000/api/applications/${applicationId}/status`,
+          `https://jobseeker1-6lnb.onrender.com/api/applications/${applicationId}/status`,
           { status: newStatus },
           {
             headers: {

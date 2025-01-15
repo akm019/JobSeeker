@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 import { AuthContext } from '../../AuthContext';
 import MessageAttachment from './MessageAttachment';
 
-const socket = io('http://localhost:5000');
+const socket = io('https://jobseeker1-6lnb.onrender.com');
 
 function ChatRoom({ roomId }) {
   const [messages, setMessages] = useState([]);

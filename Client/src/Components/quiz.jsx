@@ -24,7 +24,7 @@ const AIQuiz = () => {
     setError(null);
   
     try {
-      const response = await fetch('http://localhost:5000/api/quiz/evaluate', {
+      const response = await fetch('https://jobseeker1-6lnb.onrender.com/api/quiz/evaluate', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

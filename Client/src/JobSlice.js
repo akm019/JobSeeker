@@ -14,7 +14,7 @@ export const applyToJob = createAsyncThunk(
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/apply/${jobId}`,
+        `https://jobseeker1-6lnb.onrender.com/api/apply/${jobId}`,
         {
           coverLetter: ""
         },
@@ -50,7 +50,7 @@ export const fetchJobs = createAsyncThunk(
   'jobs/fetchJobs',
   async (_, { getState, rejectWithValue }) => {
     try {
-      const response = await axios.get("http://localhost:5000/api/JobPost");
+      const response = await axios.get("https://jobseeker1-6lnb.onrender.com/api/JobPost");
       const { userApplications } = getState().jobs;
       
       // Merge job data with application status
@@ -77,7 +77,7 @@ export const fetchUserApplications = createAsyncThunk(
     
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/my-applications",
+        "https://jobseeker1-6lnb.onrender.com/api/my-applications",
         {
           headers: { Authorization: `Bearer ${token}` }
         }

@@ -54,7 +54,7 @@ const ProfileEdit = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/profile',
+        'https://jobseeker1-6lnb.onrender.com/api/profile',
         formData,
         {
           headers: {
