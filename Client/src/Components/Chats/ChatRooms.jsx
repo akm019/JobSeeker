@@ -42,7 +42,7 @@ function ChatRooms() {
     try {
       const token = localStorage.getItem('token');
       const statusPromises = rooms.map(room => 
-        fetch(`https://jobseeker1-6lnb.onrender.com/api/rooms/${room._id}/enrollment-status`, {
+        fetch(`https://jobseeker-1-mg4e.onrender.com/api/rooms/${room._id}/enrollment-status`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -66,7 +66,7 @@ function ChatRooms() {
     e.preventDefault();
     
     try {
-      const response = await fetch('https://jobseeker1-6lnb.onrender.com/api/rooms', {
+      const response = await fetch('https://jobseeker-1-mg4e.onrender.com/api/rooms', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ function ChatRooms() {
 
   const fetchRooms = async () => {
     try {
-      const res = await fetch('https://jobseeker1-6lnb.onrender.com/api/rooms', {
+      const res = await fetch('https://jobseeker-1-mg4e.onrender.com/api/rooms', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -130,7 +130,7 @@ function ChatRooms() {
     if (!selectedRoom) return;
 
     try {
-      const res = await fetch(`https://jobseeker1-6lnb.onrender.com/api/rooms/${selectedRoom._id}/enroll`, {
+      const res = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/rooms/${selectedRoom._id}/enroll`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

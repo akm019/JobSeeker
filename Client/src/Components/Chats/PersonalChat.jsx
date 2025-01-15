@@ -3,7 +3,7 @@ import { Send, Paperclip, X, Trash2 } from 'lucide-react';
 import io from 'socket.io-client';
 import MessageAttachment from './MessageAttachment';
 
-const socket = io('https://jobseeker1-6lnb.onrender.com');
+const socket = io('https://jobseeker-1-mg4e.onrender.com');
 
 const PersonalChat = ({ participant, onClose, currentUser }) => {
   const [messages, setMessages] = useState([]);
