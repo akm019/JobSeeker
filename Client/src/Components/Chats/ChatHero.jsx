@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import Ani from '../../assets/Ani1.json';
 import { MessageSquare, ArrowRight } from 'lucide-react';
-
+import { Link } from 'react-router-dom';
 const ChatHero = () => {
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -73,7 +73,8 @@ const ChatHero = () => {
               variants={itemVariants}
               className="flex flex-wrap gap-4"
             >
-              <motion.button
+             <Link to="/ChatRooms">
+             <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="group relative inline-flex items-center justify-center px-8 py-3 text-lg font-semibold text-white bg-[#4361EE] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-[#4361EE]/50"
@@ -85,15 +86,15 @@ const ChatHero = () => {
                 <div
                   className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity"
                 />
-              </motion.button>
+              </motion.button></Link>
 
-              <motion.button
+              {/* <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="px-8 py-3 text-lg font-semibold text-white border-2 border-white/20 rounded-xl hover:bg-white/10 transition-colors"
               >
                 Learn More
-              </motion.button>
+              </motion.button> */}
             </motion.div>
 
             {/* Stats Section */}
