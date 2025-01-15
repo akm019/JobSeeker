@@ -26,7 +26,7 @@ const server = http.createServer(app);
 // Initialize Socket.IO with CORS - Update this part
 const io = new Server(server, {
   cors: {
-    origin: "https://jobseeker-inky.vercel.app", // Your frontend URL
+    origin: true, // Your frontend URL
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
@@ -35,7 +35,7 @@ const io = new Server(server, {
 
 // Middleware
 app.use(cors({
-  origin:'*',
+  origin:true,
   credentials: true
 }));
 app.use(express.json());
