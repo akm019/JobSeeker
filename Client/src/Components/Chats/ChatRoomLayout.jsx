@@ -37,8 +37,12 @@ function ChatRoomLayout() {
     }
   };
 
-
-  const socket = io('https://jobseeker1-6lnb.onrender.com');
+  const socket = io("https://jobseeker1-6lnb.onrender.com", {
+    transports: ['websocket', 'polling'],
+    forceNew: true,
+    reconnectionAttempts: 5,
+    timeout: 10000,
+  });
 
   const closePersonalChat = (participantId) => {
     setActivePersonalChats(prev => prev.filter(chat => chat._id !== participantId));
