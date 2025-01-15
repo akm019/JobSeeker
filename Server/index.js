@@ -9,11 +9,14 @@ import profileRoute from './Routes/profileRoute.js';
 import JobRoutes from './Routes/JobRoutes.js';
 import chatRoutes from './Routes/ChatRoutes.js';
 import { Server } from "socket.io";
+import resumeRouter from './Routes/resumeRoutes.js'
+import interview from './Routes/interviewRoutes.js'
+import quizRouter from './Routes/quizRoutes.js'
 import ChatMessage from './Models/ChatMessage.js'; // Add this import
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 const app = express();
 
 // Create HTTP server
@@ -40,14 +43,23 @@ app.use(bodyParser.json());
 app.set('io', io);
 
 // Routes
+app.use('/api/resume',resumeRouter)
+app.use('/api/quiz',quizRouter)
 app.use('/api', authRoutes);
 app.use('/api', profileRoute);
 app.use('/api', JobRoutes);
 app.use('/api', chatRoutes);
+app.use('/api/interview',interview)
 
 // Database Connection
 connectDB();
+import session from 'express-session';
 
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true
+}));
 // In your socket.io setup file
 // Socket.IO connection handling
 io.on('connection', (socket) => {

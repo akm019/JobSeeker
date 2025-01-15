@@ -1,0 +1,154 @@
+const AIQuiz = () => {
+  const [quizState, setQuizState] = useState('setup');
+  const [formData, setFormData] = useState({
+    position: '',
+    experienceLevel: '',
+    topicsOfInterest: '',
+    preferredQuestions: 5
+  });
+  
+  const token = localStorage.getItem('token');
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState({});
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [quizId, setQuizId] = useState(null);
+
+  const startQuiz = async () => {
+    setLoading(true);
+    setError(null);
+  
+    try {
+      const response = await fetch('http://localhost:5000/api/quiz/evaluate', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to generate quiz');
+      }
+  
+      const data = await response.json();
+      
+      if (!data.questions || !Array.isArray(data.questions) || data.questions.length === 0) {
+        throw new Error('Invalid quiz data received');
+      }
+  
+      setQuestions(data.questions);
+      setQuizId(data.quizId); // Store the quiz ID
+      setCurrentQuestionIndex(0);
+      setAnswers({});
+      setQuizState('quiz');
+    } catch (error) {
+      console.error('Error starting quiz:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAnswerSubmit = (questionId, answer) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }));
+  };
+  
+  // Modify the submitQuiz function:
+  const submitQuiz = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('http://localhost:5000/api/quiz/evaluate', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          answers,
+          questions,
+          quizId, // Include the quiz ID
+          position: formData.position,
+          experienceLevel: formData.experienceLevel
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to evaluate quiz');
+      }
+  
+      const results = await response.json();
+      setResults(results);
+      setQuizState('results');
+    } catch (error) {
+      console.error('Error submitting quiz:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+   const renderContent = () => {
+    switch (quizState) {
+      case 'setup':
+        return renderSetupForm();
+      case 'quiz':
+        return renderQuestion();
+      case 'results':
+        return renderResults();
+      default:
+        return null;
+    }
+  };
+
+
+
+
+
+  useEffect(() => {
+    dispatch(fetchJobs());
+    dispatch(fetchUserApplications());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (successMessage || error) {
+      const timer = setTimeout(() => {
+        dispatch(clearMessages());
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, error, dispatch]);
+
+  useEffect(() => {
+    function onKeyDown(event) {
+      if (event.key === "Escape") {
+        setActive(false);
+      }
+    }
+
+    if (active && typeof active === "object") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [active]);
+
+  useOutsideClick(ref, () => setActive(null));
+
+  const handleApply = async (jobId) => {
+    dispatch(applyToJob(jobId))
+      .unwrap()
+      .then(() => {
+        dispatch(fetchUserApplications());
+        setActive(null);
+      });
+  };

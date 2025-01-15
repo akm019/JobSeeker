@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Paperclip, Send, Trash2, X } from 'lucide-react';
 import io from 'socket.io-client';
 import { AuthContext } from '../../AuthContext';
+import MessageAttachment from './MessageAttachment';
 
 const socket = io('http://localhost:5000');
 
@@ -103,7 +104,11 @@ function ChatRoom({ roomId }) {
       if (!res.ok) throw new Error('Upload failed');
       
       const data = await res.json();
-      return data.url;
+      return {
+        url: data.url,
+        originalName: data.originalName,
+        filename: data.filename
+      };
     } catch (error) {
       console.error('Error uploading file:', error);
       throw error;
@@ -227,17 +232,11 @@ function ChatRoom({ roomId }) {
                   )}
                   <p className="text-sm">{message.text}</p>
                   {message.attachment && (
-                    <a 
-                      href={message.attachment}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`block mt-2 text-sm underline ${
-                        isOwnMessage ? 'text-blue-100' : 'text-blue-500'
-                      }`}
-                    >
-                      View Attachment
-                    </a>
-                  )}
+    <MessageAttachment 
+      attachment={message.attachment} 
+      isOwnMessage={isOwnMessage} 
+    />
+  )}
                 </div>
               </div>
             </div>

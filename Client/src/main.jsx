@@ -12,6 +12,8 @@ import Courses from './Components/Courses.jsx'
 import ChatRooms from './Components/Chats/ChatRooms.jsx'
 import ChatRoom from './Components/Chats/ChatRoom.jsx'
 import ChatRoomLayout from './Components/Chats/ChatRoomLayout.jsx'
+import ResumeAnalyzer from './Components/Chats/ResumeAnalyzer.jsx'
+import QuizHistory from './Components/QuizHistory.jsx'
 
 import JobPost from './Components/JobPost.jsx'
 import {
@@ -20,6 +22,8 @@ import {
 import Form from './Components/Form.jsx'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import ProfileEdit from './Components/ProfileEdit.jsx'
+import MockInterview from './Components/quiz.jsx'
+import AIQuiz from './Components/quiz.jsx'
 
 const router = createBrowserRouter([
   {
@@ -61,6 +65,19 @@ const router = createBrowserRouter([
   path:'chat/:roomId',
   element:<ChatRoomLayout/>
 },
+{
+  path:"resumeAnalyzer",
+  element:<ResumeAnalyzer/>
+},
+{
+  path:"AIQuiz",
+  element:<AIQuiz/>
+},
+{
+  path:"QuizHistory",
+  element:<QuizHistory/>
+}
+
 // {
 //   path:'chat/:roomId',
 //   element:<ChatRoom/>

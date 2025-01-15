@@ -8,13 +8,13 @@ import { useNavigate } from "react-router-dom";
 
 const Signup = ({ onClose }) => {
   const {login} = useContext(AuthContext)
-  const [isSignup, setIsSignup] = useState(true); // Toggle between Signup and Login
+  const [isSignup, setIsSignup] = useState(true); 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-  const [googleUserData, setGoogleUserData] = useState(null); // To handle Google user data
-  const [error, setError] = useState(null); // For error handling
+  const [googleUserData, setGoogleUserData] = useState(null); 
+  const [error, setError] = useState(null); 
   const navigate = useNavigate();
 
   // Google Login
@@ -116,11 +116,12 @@ const Signup = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black z-50 bg-opacity-30 backdrop-blur-sm">
-      <div className="flex flex-col items-center justify-center">
-        <div className="relative md:w-[30%]">
+
+      <div className="flex flex-col items-center justify-center ">
+        <div className="relative md:w-[30%] p-4 rounded-lg mt-10">
           <button
             onClick={handleClose}
-            className="text-black absolute top-3 right-4 rounded-full p-2 hover:bg-blue-600 transition"
+            className="text-black absolute top-14 right-4 rounded-full p-2 hover:bg-blue-600 transition"
           >
             <X />
           </button>

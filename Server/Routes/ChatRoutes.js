@@ -5,8 +5,30 @@ import ChatRoom from '../Models/ChatRoom.js'
 import ChatMessage from '../Models/ChatMessage.js'
 import jwt from 'jsonwebtoken'
 import RoomEnrollment from '../Models/Enrollment.js'
-import multer from 'multer'; // You'll need to install this
+import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import cloudinary from 'cloudinary';
+
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+
+// const router = express.Router();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+
+const app = express();
+// Configure static file serving
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 import PersonalMessage from '../Models/PersonalMessage.js';
 
 
@@ -98,36 +120,96 @@ router.get('/personal-messages/:userId', authenticateToken, async (req, res) => 
 
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'uploads/') // Make sure this directory exists
-    },
-    filename: function (req, file, cb) {
-      cb(null, Date.now() + path.extname(file.originalname))
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
     }
-  });
-  
-  const upload = multer({ 
-    storage: storage,
-    limits: {
-      fileSize: 5 * 1024 * 1024 // 5MB limit
-    }
-  });
-  
-  // File upload endpoint
-  router.post('/upload', authenticateToken, upload.single('file'), (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded' });
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadDir = path.join(__dirname, '../uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
       }
-      
-      // Create file URL based on your server setup
-      const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-      res.json({ url: fileUrl });
-    } catch (error) {
-      console.error('File upload error:', error);
-      res.status(500).json({ message: 'Error uploading file' });
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + path.extname(file.originalname));
     }
-  });
+  }),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // Increased to 10MB to accommodate PDFs
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|pdf/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('File type not supported! Please upload an image or PDF.'));
+  }
+});
+
+router.post('/upload', authenticateToken, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    // Configure upload based on file type
+    const uploadOptions = {
+      resource_type: 'auto', // This allows both images and PDFs
+      folder: 'chat_attachments',
+      // Optional: Add these for PDFs if you want to restrict download access
+      // access_mode: 'authenticated',
+      // type: 'private'
+    };
+
+    // If it's a PDF, you might want to add specific options
+    if (req.file.mimetype === 'application/pdf') {
+      uploadOptions.format = 'pdf';
+      uploadOptions.flags = 'attachment'; // Forces download rather than preview
+    }
+
+    const result = await cloudinary.v2.uploader.upload(req.file.path, uploadOptions);
+
+    // Clean up the local file
+    fs.unlinkSync(req.file.path);
+
+    // Return a more detailed response
+    res.json({
+      url: result.secure_url,
+      originalName: req.file.originalname,
+      filename: result.public_id,
+      fileType: req.file.mimetype,
+      format: result.format,
+      size: result.bytes
+    });
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    // Clean up local file if it exists
+    if (req.file && req.file.path) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update multer configuration to accept PDFs
+
   
   // Modified message post endpoint to include attachments
   router.post('/messages', authenticateToken, async (req, res) => {
@@ -135,8 +217,12 @@ const storage = multer.diskStorage({
       const newMessage = new ChatMessage({
         room: req.body.room,
         sender: req.user.id,
-        text: req.body.text,
-        attachment: req.body.attachment, // Add this field to your schema
+        text: req.body.text || '',
+        attachment: req.body.attachment ? {
+          url: req.body.attachment.url,
+          originalName: req.body.attachment.originalName,
+          filename: req.body.attachment.filename
+        } : null,
         timestamp: new Date()
       });
   

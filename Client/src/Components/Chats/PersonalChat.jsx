@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Paperclip, X, Trash2 } from 'lucide-react';
 import io from 'socket.io-client';
+import MessageAttachment from './MessageAttachment';
 
 const socket = io('http://localhost:5000');
 
@@ -161,15 +162,29 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
     try {
       setIsUploading(true);
       let fileUrl = null;
+      
       if (selectedFile) {
-        fileUrl = await uploadFile(selectedFile);
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        const res = await fetch('http://localhost:5000/api/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: formData
+        });
+        
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        fileUrl = data.url; // Get url from response
       }
   
       const messageData = {
         to: participant._id,
         text: newMessage.trim(),
-        attachment: fileUrl
+        attachment: fileUrl  // Pass url directly
       };
+      // Rest of the function remains same
   
       const res = await fetch('http://localhost:5000/api/personal-messages', {
         method: 'POST',
@@ -263,17 +278,11 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
                   )}
                   <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                   {message.attachment && (
-                    <a 
-                      href={message.attachment}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`block mt-2 text-sm underline ${
-                        isOwnMessage ? 'text-blue-100' : 'text-blue-500'
-                      }`}
-                    >
-                      View Attachment
-                    </a>
-                  )}
+    <MessageAttachment 
+      attachment={message.attachment} 
+      isOwnMessage={isOwnMessage} 
+    />
+  )}
                 </div>
               </div>
             </div>
