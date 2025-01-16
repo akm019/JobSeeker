@@ -156,3 +156,39 @@ const AIQuiz = () => {
 
 
 "nodemon --max-old-space-size=4096 index.js"
+
+
+
+
+const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setError(null); // Clear previous errors
+
+    const endpoint = isSignup ? "signup" : "login";
+    const data = isSignup
+      ? { name, email, password, role }
+      : { email, password };
+
+      try {
+        const response = await axios.post(`https://jobseeker-1-mg4e.onrender.com/api/${endpoint}`, data);
+  
+        if (isSignup) {
+          setIsSignup(false); // Switch to login form
+        } else {
+          const { token, user } = response.data;
+          login(user, token); // Use the login function from context
+          onClose(); // Close modal
+          // navigate(user.role === "jobSeeker" ? "/" : "/JobPost");
+          navigate('/')
+        }
+      } catch (err) {
+        const backendError = err.response?.data?.message || "An error occurred";
+        setError(backendError);
+      }
+  };
+
+  // Toggle between signup and login forms
+  const toggleSignupLogin = () => {
+    setIsSignup(!isSignup);
+    setError(null); // Clear errors when toggling
+  };
