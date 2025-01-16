@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import React, { useState, useContext } from "react";
+import axios from "axios";
+import { AuthContext } from '../AuthContext.jsx';
+import { useNavigate } from "react-router-dom";
+const { login } = useContext(AuthContext);
+const navigate = useNavigate();
 
 function App() {
   const [isOpen, setIsOpen] = useState(true);
