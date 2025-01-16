@@ -14,7 +14,7 @@ import ChatRoom from './Components/Chats/ChatRoom.jsx'
 import ChatRoomLayout from './Components/Chats/ChatRoomLayout.jsx'
 import ResumeAnalyzer from './Components/Chats/ResumeAnalyzer.jsx'
 import QuizHistory from './Components/QuizHistory.jsx'
-
+import ProtectedRoute from './Components/ProtectedRoutes.jsx'
 import JobPost from './Components/JobPost.jsx'
 import {
   createBrowserRouter,RouterProvider
@@ -51,7 +51,8 @@ const router = createBrowserRouter([
 },
 {
   path:'ProfileEdit',
-  element:<ProfileEdit/>
+  element:<ProtectedRoute><ProfileEdit/></ProtectedRoute>
+  
 },
 {
   path:'Courses',
