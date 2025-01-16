@@ -17,65 +17,65 @@ const Signup = ({ onClose }) => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const Googlelogin = useGoogleLogin({
-    onSuccess: (response) => fetchGoogleUserProfile(response),
-    onError: (error) => console.error("Google Login Failed", error),
-  });
+  // const Googlelogin = useGoogleLogin({
+  //   onSuccess: (response) => fetchGoogleUserProfile(response),
+  //   onError: (error) => console.error("Google Login Failed", error),
+  // });
 
-  const fetchGoogleUserProfile = (tokenInfo) => {
-    axios
-      .get(
-        `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo.access_token}`,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenInfo.access_token}`,
-            Accept: "application/json",
-          },
-        }
-      )
-      .then((resp) => {
-        setGoogleUserData({
-          name: resp.data.name,
-          email: resp.data.email,
-          picture: resp.data.picture,
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching Google user profile:", error);
-      });
-  };
+  // const fetchGoogleUserProfile = (tokenInfo) => {
+  //   axios
+  //     .get(
+  //       `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo.access_token}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${tokenInfo.access_token}`,
+  //           Accept: "application/json",
+  //         },
+  //       }
+  //     )
+  //     .then((resp) => {
+  //       setGoogleUserData({
+  //         name: resp.data.name,
+  //         email: resp.data.email,
+  //         picture: resp.data.picture,
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching Google user profile:", error);
+  //     });
+  // };
 
-  const handleGoogleRoleSubmit = async () => {
-    if (!role) {
-      alert("Please select a role before proceeding.");
-      return;
-    }
+  // const handleGoogleRoleSubmit = async () => {
+  //   if (!role) {
+  //     alert("Please select a role before proceeding.");
+  //     return;
+  //   }
 
-    try {
-      const user = {
-        ...googleUserData,
-        role,
-      };
+  //   try {
+  //     const user = {
+  //       ...googleUserData,
+  //       role,
+  //     };
 
-      const response = await axios.post(
-        "http://localhost:5000/api/google-auth",
-        user
-      );
+  //     const response = await axios.post(
+  //       "http://localhost:5000/api/google-auth",
+  //       user
+  //     );
 
-      console.log("User authenticated with Google and role saved:", response.data);
-      localStorage.setItem("user", JSON.stringify(response.data));
-      console.log(user);
-      navigate('/');
-    } catch (err) {
-      console.error("Backend error:", err.response?.data || err.message);
-      setError("Failed to authenticate Google user. Try again.");
-    }
-  };
+  //     console.log("User authenticated with Google and role saved:", response.data);
+  //     localStorage.setItem("user", JSON.stringify(response.data));
+  //     console.log(user);
+  //     navigate('/');
+  //   } catch (err) {
+  //     console.error("Backend error:", err.response?.data || err.message);
+  //     setError("Failed to authenticate Google user. Try again.");
+  //   }
+  // };
 
-  const handleClose = () => {
-    onClose();
-    navigate('/');
-  };
+  // const handleClose = () => {
+  //   onClose();
+  //   navigate('/');
+  // };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -222,14 +222,14 @@ const Signup = ({ onClose }) => {
 
                 <div className="mt-6 text-center">
                   <p className="text-gray-400 mb-4">OR</p>
-                  <button
+                  {/* <button
                     type="button"
                     onClick={Googlelogin}
                     className="w-full px-6 py-3 rounded-lg border border-gray-700 text-gray-300 font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all flex items-center justify-center gap-2"
                   >
                     <img className="w-5 h-5" src={icon} alt="Google Icon" />
                     <span>{isSignup ? "Sign Up with Google" : "Log In with Google"}</span>
-                  </button>
+                  </button> */}
 
                   <p className="mt-6 text-gray-400">
                     {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
