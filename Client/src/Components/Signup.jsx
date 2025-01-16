@@ -5,6 +5,7 @@ import icon from "./google-brands-solid.svg";
 import { useGoogleLogin } from "@react-oauth/google";
 import { AuthContext } from '../AuthContext.jsx';
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Signup = ({ onClose }) => {
   const { login } = useContext(AuthContext);
@@ -95,6 +96,31 @@ const Signup = ({ onClose }) => {
         const { token, user } = response.data;
         login(user, token);
         onClose();
+        
+        // Success toast for login
+        toast.success('Login Successful', {
+          duration: 3000,
+          position: 'top-center',
+        });
+        
+        // Custom reminder toast
+        toast.custom(
+          <div className="flex items-center gap-2 bg-white px-6 py-4 shadow-lg rounded-xl">
+            <div className="text-blue-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-gray-800 font-medium">
+              Make sure you update your profile before applying for jobs
+            </p>
+          </div>,
+          {
+            duration: 5000,
+            position: 'top-center',
+          }
+        );
+        
         navigate('/');
       }
     } catch (err) {

@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, CheckCircle, ArrowRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../AuthContext.jsx';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const AIQuizHero = () => {
+
+
+  const navigate = useNavigate();
+  const {user} = useContext(AuthContext)
+  const handleClick=()=>{
+    if(!user){
+      toast.error('Please signup/login to access this feature', {
+        duration: 3000,
+        position: 'top-center',
+      });
+    } else{ navigate('/AIQuiz')}
+       
+    }
+
   const skillCategories = [
     { title: "Technical Skills", icon: Brain },
     { title: "Problem Solving", icon: Sparkles },
@@ -116,8 +133,8 @@ const AIQuizHero = () => {
               </div>
             </motion.div>
 
-            <Link to="/AIQuiz">
-              <motion.button
+           
+              <motion.button onClick={handleClick}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="group relative inline-flex items-center justify-center px-8 py-3 text-lg font-semibold text-white bg-[#4361EE] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-[#4361EE]/50"
@@ -130,7 +147,7 @@ const AIQuizHero = () => {
                   className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity"
                 />
               </motion.button>
-            </Link>
+           
           </motion.div>
         </div>
       </div>

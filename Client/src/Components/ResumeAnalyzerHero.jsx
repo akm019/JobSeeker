@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, CheckCircle, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../AuthContext.jsx';
+import toast from 'react-hot-toast';
 const ResumeAnalyzerHero = () => {
+
+
+  const navigate = useNavigate();
+const {user} = useContext(AuthContext)
+const handleClick=()=>{
+  if(!user){
+    toast.error('Please signup/login to access this feature', {
+      duration: 3000,
+      position: 'top-center',
+    });
+  } else{ navigate('/ResumeAnalyzer')}
+     
+  }
+
+
+
   return (
     <div className="relative overflow-hidden py-20 px-4 md:px-8 bg-gradient-to-br from-[#020B2D] to-[#051140]">
       {/* Background Gradient Orbs */}
@@ -75,13 +92,13 @@ const ResumeAnalyzerHero = () => {
               </div>
             </motion.div>
 
-            <Link to="/resumeanalyzer">
-              <motion.button
+           
+              <motion.button  onClick={handleClick}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="group relative inline-flex items-center justify-center px-8 py-3 text-lg font-semibold text-white bg-[#4361EE] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-[#4361EE]/50"
               >
-                <span className="relative z-10 flex items-center gap-2">
+                <span  className="relative z-10 flex items-center gap-2">
                   Get Started
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </span>
@@ -89,7 +106,7 @@ const ResumeAnalyzerHero = () => {
                   className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity"
                 />
               </motion.button>
-            </Link>
+           
           </motion.div>
 
           {/* Image/Visual Section */}

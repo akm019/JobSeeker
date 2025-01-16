@@ -24,6 +24,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import ProfileEdit from './Components/ProfileEdit.jsx'
 import MockInterview from './Components/quiz.jsx'
 import AIQuiz from './Components/quiz.jsx'
+import { Toaster } from 'react-hot-toast'
 
 const router = createBrowserRouter([
   {
@@ -93,7 +94,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
      <GoogleOAuthProvider clientId='259322720860-8ikdleici6jj1bb8m54g5pgc04tu7n2f.apps.googleusercontent.com'>
     
         <RouterProvider router={router} />
-      
+      <Toaster/>
      </GoogleOAuthProvider>
   </React.StrictMode>,
 )

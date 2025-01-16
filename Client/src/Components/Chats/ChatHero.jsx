@@ -4,6 +4,11 @@ import Lottie from 'lottie-react';
 import Ani from '../../assets/Ani1.json';
 import { MessageSquare, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../AuthContext.jsx';
+import toast from 'react-hot-toast';
+import { useContext } from 'react';
+
 const ChatHero = () => {
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -25,6 +30,19 @@ const ChatHero = () => {
       }
     }
   };
+
+
+  const navigate = useNavigate();
+  const {user} = useContext(AuthContext)
+  const handleClick=()=>{
+    if(!user){
+      toast.error('Please signup/login to access this feature', {
+        duration: 3000,
+        position: 'top-center',
+      });
+    } else{ navigate('/AIQuiz')}
+       
+    }
 
   return (
     <div className="relative overflow-hidden py-20 px-4 md:px-8 bg-gradient-to-br from-[#020B2D] to-[#051140]">
@@ -73,8 +91,8 @@ const ChatHero = () => {
               variants={itemVariants}
               className="flex flex-wrap gap-4"
             >
-             <Link to="/ChatRooms">
-             <motion.button
+            
+             <motion.button onClick={handleClick}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="group relative inline-flex items-center justify-center px-8 py-3 text-lg font-semibold text-white bg-[#4361EE] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-[#4361EE]/50"
@@ -86,7 +104,7 @@ const ChatHero = () => {
                 <div
                   className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity"
                 />
-              </motion.button></Link>
+              </motion.button>
 
               {/* <motion.button
                 whileHover={{ scale: 1.05 }}

@@ -10,6 +10,7 @@ import { AnimatedTestimonials } from './Testimonial.jsx';
 import ChatHero from './Chats/ChatHero.jsx';
 import ResumeAnalyzerHero from './ResumeAnalyzerHero.jsx';
 import AIQuizHero from './AIQuizHero.jsx';
+import { toast } from 'react-hot-toast';
 
 
 const testimonials = [
@@ -83,16 +84,38 @@ const Hero = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    if (!user) {
+      toast.error('Please login or signup to access this page', {
+        duration: 3000,
+        position: 'top-center',
+      })
+    }
+    else{
+      e.preventDefault();
     navigate(`/JobFind?query=${encodeURIComponent(searchQuery)}`);
+    }
+    
   };
 
   const handleJobClick = (jobId) => {
-    navigate(`/JobFind?selected=${jobId}`);
+    if (!user) {
+      toast.error('Please login or signup to access this page', {
+        duration: 3000,
+        position: 'top-center',
+      })
+    }
+    else{
+      navigate(`/JobFind?selected=${jobId}`);
+    }
+   
   };
 
   const handleGetStarted = () => {
     if (!user) {
-      alert("Kindly SignUp first");
+      toast.error('Please login or signup to access this page', {
+        duration: 3000,
+        position: 'top-center',
+      });
       navigate('/');
     } else if (user.role === 'jobSeeker') {
       navigate('/JobFind');
@@ -102,9 +125,36 @@ const Hero = () => {
   };
 
 
+
+  const handleClick = () => {
+    if (!user) {
+      toast.error('Please login or signup to access this page', {
+        duration: 3000,
+        position: 'top-center',
+      });
+    } 
+    else {
+      navigate('/JobFind');
+    } 
+  };
+  const handleCardClick = (e, link) => {
+    if (!user) {
+      e.preventDefault();
+      toast.error('Please signup/login to access this feature', {
+        duration: 3000,
+        position: 'top-center',
+      });
+      return;
+    }
+  };
+
+
   const handleProfileEdit = () => {
     if (!user) {
-      alert("Kindly SignUp first");
+      toast.error('Please login or signup to access this page', {
+        duration: 3000,
+        position: 'top-center',
+      });;
       navigate('/');
     } 
     else {
@@ -328,58 +378,61 @@ const Hero = () => {
           </motion.div>
 
           {/* Quick Access Cards */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="flex-1 grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {[
-              {
-                title: "Learn & Grow",
-                description: "Get industry ready with our courses",
-                icon: <BookOpen className="text-[#4361EE]" />,
-                link: "/Courses",
-                color: "from-blue-500/20 to-purple-500/20"
-              },
-              {
-                title: "Expert Connect",
-                description: "Chat with industry professionals",
-                icon: <MessageCircle className="text-[#4361EE]" />,
-                link: "/ChatRooms",
-                color: "from-green-500/20 to-blue-500/20"
-              },
-              {
-                title: "Practice Quizes",
-                description: "Prepare with mock quizes",
-                icon: <Target className="text-[#4361EE]" />,
-                link: "/AIQuiz",
-                color: "from-purple-500/20 to-pink-500/20"
-              }
-            ].map((card, index) => (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                whileHover={{ y: -5 }}
-                className={`bg-gradient-to-br ${card.color} backdrop-blur-lg rounded-2xl p-6 border border-white/20`}
-              >
-                <div className="bg-white/10 rounded-full w-12 h-12 flex items-center justify-center mb-4">
-                  {card.icon}
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">{card.title}</h3>
-                <p className="text-white/60 mb-4">{card.description}</p>
-                <Link to={card.link}>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="px-6 py-2 bg-[#4361EE] text-white rounded-xl hover:bg-[#3651D4] transition-colors flex items-center gap-2"
-                  >
-                    <span>Explore</span>
-                    <ArrowRight size={16} />
-                  </motion.button>
-                </Link>
-              </motion.div>
-            ))}
+  
+
+  
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex-1 grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
+      {[
+        {
+          title: "Learn & Grow",
+          description: "Get industry ready with our courses",
+          icon: <BookOpen className="text-[#4361EE]" />,
+          link: "/Courses",
+          color: "from-blue-500/20 to-purple-500/20"
+        },
+        {
+          title: "Expert Connect",
+          description: "Chat with industry professionals",
+          icon: <MessageCircle className="text-[#4361EE]" />,
+          link: "/ChatRooms",
+          color: "from-green-500/20 to-blue-500/20"
+        },
+        {
+          title: "Practice Quizes",
+          description: "Prepare with mock quizes",
+          icon: <Target className="text-[#4361EE]" />,
+          link: "/AIQuiz",
+          color: "from-purple-500/20 to-pink-500/20"
+        }
+      ].map((card, index) => (
+        <motion.div
+          key={index}
+          variants={itemVariants}
+          whileHover={{ y: -5 }}
+          className={`bg-gradient-to-br ${card.color} backdrop-blur-lg rounded-2xl p-6 border border-white/20`}
+        >
+          <div className="bg-white/10 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+            {card.icon}
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">{card.title}</h3>
+          <p className="text-white/60 mb-4">{card.description}</p>
+          <Link to={card.link} onClick={(e) => handleCardClick(e, card.link)}>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-6 py-2 bg-[#4361EE] text-white rounded-xl hover:bg-[#3651D4] transition-colors flex items-center gap-2"
+            >
+              <span>Explore</span>
+              <ArrowRight size={16} />
+            </motion.button>
+          </Link>
+        </motion.div>
+      ))}
           </motion.div>
         </div>
       </div>
