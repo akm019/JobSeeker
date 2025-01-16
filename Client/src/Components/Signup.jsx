@@ -72,10 +72,10 @@ const Signup = ({ onClose }) => {
   //   }
   // };
 
-  // const handleClose = () => {
-  //   onClose();
-  //   navigate('/');
-  // };
+  const handleClose = () => {
+    onClose();
+    navigate('/');
+  };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
