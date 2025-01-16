@@ -154,4 +154,4 @@ const Signup = ({ onClose }) => {
   );
 };
 
-export default Signup;
+export default App;
