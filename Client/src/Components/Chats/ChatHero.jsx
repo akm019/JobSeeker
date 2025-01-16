@@ -40,7 +40,7 @@ const ChatHero = () => {
         duration: 3000,
         position: 'top-center',
       });
-    } else{ navigate('/AIQuiz')}
+    } else{ navigate('/ChatRooms')}
        
     }
 
