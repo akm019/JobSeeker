@@ -51,7 +51,7 @@ const router = createBrowserRouter([
 },
 {
   path:'ProfileEdit',
-  element:<ProtectedRoute><ProfileEdit/></ProtectedRoute>
+  element:<ProfileEdit/>
   
 },
 {
