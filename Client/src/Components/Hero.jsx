@@ -101,6 +101,17 @@ const Hero = () => {
     }
   };
 
+
+  const handleProfileEdit = () => {
+    if (!user) {
+      alert("Kindly SignUp first");
+      navigate('/');
+    } 
+    else {
+      navigate('/ProfileEdit');
+    } 
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -301,8 +312,9 @@ const Hero = () => {
                   <p><span className="text-white">Skills:</span> {user?.skills?.join(", ") || "Add your skills"}</p>
                 </div>
 
-                <Link to="/ProfileEdit" className="mt-6 w-full">
+               
                   <motion.button
+                  onClick={handleProfileEdit}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full px-6 py-3 bg-[#4361EE] text-white rounded-xl hover:bg-[#3651D4] transition-colors flex items-center justify-center gap-2"
@@ -310,7 +322,7 @@ const Hero = () => {
                     <span>Edit Profile</span>
                     <ArrowRight size={18} />
                   </motion.button>
-                </Link>
+                
               </div>
             </div>
           </motion.div>
