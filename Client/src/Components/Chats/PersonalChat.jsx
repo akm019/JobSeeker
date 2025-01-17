@@ -72,7 +72,7 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
   const fetchPersonalMessages = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`http://localhost:5000/api/personal-messages/${participant._id}`, {
+      const res = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/personal-messages/${participant._id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -116,7 +116,7 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
     formData.append('file', file);
     
     try {
-      const res = await fetch('http://localhost:5000/api/upload', {
+      const res = await fetch('https://jobseeker-1-mg4e.onrender.com/api/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -135,7 +135,7 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
 
   const deleteMessage = async (messageId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/personal-messages/${messageId}`, {
+      const res = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/personal-messages/${messageId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -166,7 +166,7 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
       if (selectedFile) {
         const formData = new FormData();
         formData.append('file', selectedFile);
-        const res = await fetch('http://localhost:5000/api/upload', {
+        const res = await fetch('https://jobseeker-1-mg4e.onrender.com/api/upload', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -186,7 +186,7 @@ const PersonalChat = ({ participant, onClose, currentUser }) => {
       };
       // Rest of the function remains same
   
-      const res = await fetch('http://localhost:5000/api/personal-messages', {
+      const res = await fetch('https://jobseeker-1-mg4e.onrender.com/api/personal-messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
