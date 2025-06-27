@@ -35,7 +35,7 @@ function ResumeAnalyzer  ()  {
     formData.append('jobDescription', jobDescription);
 
     try {
-      const response = await fetch('https://jobseeker-1-mg4e.onrender.com/api/resume/analyze', {
+      const response = await fetch('https://jobseeker-1-1buy.onrender.com/api/resume/analyze', {
         method: 'POST',
         body: formData,
       });

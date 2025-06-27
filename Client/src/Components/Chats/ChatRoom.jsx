@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 import { AuthContext } from '../../AuthContext';
 import MessageAttachment from './MessageAttachment';
 
-const socket = io("https://jobseeker-1-mg4e.onrender.com", {
+const socket = io("https://jobseeker-1-1buy.onrender.com", {
   transports: ['websocket', 'polling'],
   forceNew: true,
   reconnectionAttempts: 5,
@@ -62,7 +62,7 @@ function ChatRoom({ roomId }) {
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/messages/${roomId}`, {
+      const res = await fetch(`https://jobseeker-1-1buy.onrender.com/api/messages/${roomId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -98,7 +98,7 @@ function ChatRoom({ roomId }) {
     formData.append('file', file);
     
     try {
-      const res = await fetch('https://jobseeker-1-mg4e.onrender.com/api/upload', {
+      const res = await fetch('https://jobseeker-1-1buy.onrender.com/api/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -122,7 +122,7 @@ function ChatRoom({ roomId }) {
 
   const deleteMessage = async (messageId) => {
     try {
-      const res = await fetch(`https://jobseeker-1-mg4e.onrender.com/api/messages/${messageId}`, {
+      const res = await fetch(`https://jobseeker-1-1buy.onrender.com/api/messages/${messageId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -159,7 +159,7 @@ function ChatRoom({ roomId }) {
         attachment: fileUrl
       };
       
-      const res = await fetch('https://jobseeker-1-mg4e.onrender.com/api/messages', {
+      const res = await fetch('https://jobseeker-1-1buy.onrender.com/api/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

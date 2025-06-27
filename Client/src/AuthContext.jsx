@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
   // Update user profile
   const updateUser = async (updatedData) => {
     try {
-      const response = await fetch('https://jobseeker-1-mg4e.onrender.com/api/profile', {
+      const response = await fetch('https://jobseeker-1-1buy.onrender.com/api/profile', {
         method: 'POST', // Change this to 'PATCH' if your backend expects a PATCH request
         headers: {
           'Content-Type': 'application/json',

@@ -24,7 +24,7 @@ const AIQuiz = () => {
     setError(null);
   
     try {
-      const response = await fetch('https://jobseeker-1-mg4e.onrender.com/api/quiz/evaluate', {
+      const response = await fetch('https://jobseeker-1-1buy.onrender.com/api/quiz/evaluate', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ const AIQuiz = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://jobseeker-1-mg4e.onrender.com/api/quiz/evaluate', {
+      const response = await fetch('https://jobseeker-1-1buy.onrender.com/api/quiz/evaluate', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

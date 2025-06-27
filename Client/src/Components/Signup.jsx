@@ -88,7 +88,7 @@ const Signup = ({ onClose }) => {
       : { email, password };
 
     try {
-      const response = await axios.post(`https://jobseeker-1-mg4e.onrender.com/api/${endpoint}`, data);
+      const response = await axios.post(`https://jobseeker-1-1buy.onrender.com/api/${endpoint}`, data);
 
       if (isSignup) {
         setIsSignup(false);
